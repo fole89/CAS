@@ -875,25 +875,16 @@ function buildProblematiche(){
   // Email mancante
   const noEmail=socioSez.filter(p=>!p.email);
 
-  // Numero socio CAS mancante o non a 6 cifre
-  const noCasNum=socioSez.filter(p=>!/^\d{6}$/.test(p.numero_socio));
-
   // Indirizzo incompleto (via o luogo mancanti)
   const noAddr=socioSez.filter(p=>!p.via||!p.luogo);
 
-  // Data di nascita mancante
-  const noNascita=socioSez.filter(p=>!p.nascita);
-
   document.getElementById('issue-summary').innerHTML=`
-    <div class="issue-card"><div class="ic-n">${notInReg.length}</div><div class="ic-l">Capogita nelle gite non nel registro</div></div>
-    <div class="issue-card"><div class="ic-n">${capNoGite.length}</div><div class="ic-l">Capogita nel registro senza gite</div></div>
+    <div class="issue-card"><div class="ic-n">${notInReg.length}</div><div class="ic-l">Capogita senza ruolo</div></div>
+    <div class="issue-card"><div class="ic-n">${capNoGite.length}</div><div class="ic-l">Capogita senza gite</div></div>
     <div class="issue-card"><div class="ic-n">${gNoCAP.length}</div><div class="ic-l">Gite senza capogita</div></div>
     <div class="issue-card"><div class="ic-n">${inattivi.length}</div><div class="ic-l">Monitori inattivi (3+ anni)</div></div>
     <div class="issue-card"><div class="ic-n">${doppioni.length}</div><div class="ic-l">Persone con account doppio</div></div>
-    <div class="issue-card"><div class="ic-n">${noEmail.length}</div><div class="ic-l">Soci senza email</div></div>
-    <div class="issue-card"><div class="ic-n">${noCasNum.length}</div><div class="ic-l">Soci senza nr. CAS valido</div></div>
-    <div class="issue-card"><div class="ic-n">${noAddr.length}</div><div class="ic-l">Soci con indirizzo incompleto</div></div>
-    <div class="issue-card"><div class="ic-n">${noNascita.length}</div><div class="ic-l">Soci senza data di nascita</div></div>`;
+    <div class="issue-card"><div class="ic-n">${noEmail.length}</div><div class="ic-l">Soci senza email</div></div>`;
 
   document.getElementById('issues-body').innerHTML=`
     <div class="issue-sec">
@@ -962,19 +953,6 @@ function buildProblematiche(){
       </table>
     </div>
 
-    <div class="issue-sec">
-      <h3>🔢 Soci sezione senza numero CAS valido (${noCasNum.length})</h3>
-      <p class="issue-desc">Il numero socio CAS deve essere di 6 cifre. Questi soci hanno un valore mancante o non conforme (controllare anche la colonna Sigla).</p>
-      <table class="issue-table">
-        <thead><tr><th>Nome</th><th>Nr. socio attuale</th><th>Email</th><th>Luogo</th></tr></thead>
-        <tbody>${noCasNum.map(p=>`<tr>
-          <td><strong>${p.nome}</strong></td>
-          <td><span style="color:#d97706;font-weight:600">${p.numero_socio||'(vuoto)'}</span></td>
-          <td style="font-size:.78rem">${p.email||'–'}</td>
-          <td>${p.luogo||'–'}</td>
-        </tr>`).join('')}</tbody>
-      </table>
-    </div>
 
     <div class="issue-sec">
       <h3>🏠 Soci sezione con indirizzo incompleto (${noAddr.length})</h3>
@@ -986,20 +964,6 @@ function buildProblematiche(){
           <td>${p.via||'<span style="color:#d97706">mancante</span>'}</td>
           <td>${p.luogo||'<span style="color:#d97706">mancante</span>'}</td>
           <td style="font-size:.78rem">${p.email||'–'}</td>
-        </tr>`).join('')}</tbody>
-      </table>
-    </div>
-
-    <div class="issue-sec">
-      <h3>🎂 Soci sezione senza data di nascita (${noNascita.length})</h3>
-      <p class="issue-desc">Questi soci non hanno una data di nascita registrata.</p>
-      <table class="issue-table">
-        <thead><tr><th>Nome</th><th>Nr. socio CAS</th><th>Email</th><th>Ingresso</th></tr></thead>
-        <tbody>${noNascita.map(p=>`<tr>
-          <td><strong>${p.nome}</strong></td>
-          <td>${p.numero_socio||'–'}</td>
-          <td style="font-size:.78rem">${p.email||'–'}</td>
-          <td>${p.ingresso||'–'}</td>
         </tr>`).join('')}</tbody>
       </table>
     </div>`;
