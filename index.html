@@ -249,8 +249,15 @@ tbody td{padding:7px 12px;border-bottom:1px solid #edf0f5;vertical-align:middle}
       </div>
     </div>
     <div class="charts2">
-      <div class="cbox"><h3>👤 Capogita attivi per anno</h3><p class="note">Capogita unici (cap. + co-cap.) per anno solare</p><div class="ch-med"><canvas id="cCapAnno"></canvas></div></div>
+      <div class="cbox"><h3>👤 Capogita attivi per anno</h3><p class="note">Capogita unici (capogita + co-capogita)</p><div class="ch-med"><canvas id="cCapAnno"></canvas></div></div>
       <div class="cbox"><h3>📊 Attività per gruppo e anno</h3><div class="ch-med"><canvas id="cGruppoAnno"></canvas></div></div>
+    </div>
+    <div class="charts2" style="grid-template-columns:1fr">
+      <div class="cbox">
+        <h3>📉 Rapporto copogita per numero attività </h3>
+        <p class="note" id="cParetoNote"></p>
+        <div class="ch"><canvas id="cPareto"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -762,6 +769,37 @@ function rebuildStatsCharts(){
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},
       scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+
+  // Curva di concentrazione (Lorenz): % monitori vs % gite cumulate
+  const cntLor=countLeaders(GITE);
+  const sortedLor=Object.values(cntLor).map(v=>v.ng).sort((a,b)=>b-a);
+  const totLor=sortedLor.reduce((s,v)=>s+v,0);
+  const nLor=sortedLor.length;
+  const lorenzPts=[{x:0,y:0}];
+  let cumLor=0;
+  sortedLor.forEach((v,i)=>{cumLor+=v;lorenzPts.push({x:(i+1)/nLor*100,y:cumLor/totLor*100});});
+  const idx20=Math.ceil(nLor*0.2);
+  const pct20=(sortedLor.slice(0,idx20).reduce((s,v)=>s+v,0)/totLor*100).toFixed(0);
+  let topFor80=sortedLor.length,acc=0;
+  for(let i=0;i<sortedLor.length;i++){acc+=sortedLor[i];if(acc/totLor>=0.8){topFor80=i+1;break;}}
+  const pctFor80=(topFor80/nLor*100).toFixed(0);
+  const noteEl=document.getElementById('cParetoNote');
+  if(noteEl) noteEl.textContent=`Il 20% dei capogita più attivi svolge il ${pct20}% delle attività · l'80% delle gite è svolta dal ${pctFor80}% dei capigita)`;
+  mkChart('cPareto',{type:'scatter',
+    data:{datasets:[
+      {label:'Curva di concentrazione',data:lorenzPts,showLine:true,fill:true,
+       borderColor:'#e63946',backgroundColor:'#e6394611',tension:.15,pointRadius:0,borderWidth:2},
+      {label:'Distribuzione uniforme',data:[{x:0,y:0},{x:100,y:100}],showLine:true,fill:false,
+       borderColor:'#9ca3af',backgroundColor:'transparent',tension:0,pointRadius:0,borderWidth:1,borderDash:[6,4]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?`Top ${ctx.parsed.x.toFixed(1)}% monitori → ${ctx.parsed.y.toFixed(1)}% attività`:null}}},
+      scales:{
+        x:{min:0,max:100,title:{display:true,text:'% capogita (dal più attivo)',font:{size:10}},ticks:{callback:v=>v+'%'}},
+        y:{min:0,max:100,beginAtZero:true,title:{display:true,text:'% attività cumulate',font:{size:10}},ticks:{callback:v=>v+'%'}}
+      }}});
+
 }
 
 // ── PERSONE ────────────────────────────────────────────
