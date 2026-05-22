@@ -803,14 +803,18 @@ function rebuildStatsCharts(){
     options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{x:{beginAtZero:true},y:{ticks:{font:{size:10}}}}}});
 
+  const DIFF_AGG={'F':'F','PD':'PD','PD+':'PD','AD-':'AD','AD':'AD','AD+':'AD','D':'D','D+':'D','ED':'D','?':'?'};
+  const AGG_ORDER=['F','PD','AD','D','?'];
+  const AGG_PAL={'F':'#34d399','PD':'#60a5fa','AD':'#f97316','D':'#dc2626','?':'#d1d5db'};
+  const AGG_CLS={'F':'dF','PD':'dPD','AD':'dAD','D':'dD','?':'dND'};
   const tec={};
-  GITE.forEach(g=>{if(g.te){const d=normDiff(g.te);tec[d]=(tec[d]||0)+1;}});
-  const ordD=DIFF_ORDER.filter(d=>tec[d]);
+  GITE.forEach(g=>{if(g.te){const d=DIFF_AGG[normDiff(g.te)]||'?';tec[d]=(tec[d]||0)+1;}});
+  const ordD=AGG_ORDER.filter(d=>tec[d]);
   mkChart('cTecnica',{type:'bar',
-    data:{labels:ordD,datasets:[{label:'Gite',data:ordD.map(d=>tec[d]),backgroundColor:ordD.map(d=>DIFF_PAL[d]||'#d1d5db'),borderRadius:6}]},
+    data:{labels:ordD,datasets:[{label:'Gite',data:ordD.map(d=>tec[d]),backgroundColor:ordD.map(d=>AGG_PAL[d]||'#d1d5db'),borderRadius:6}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
   const legEl=document.getElementById('diff-legend');
-  if(legEl) legEl.innerHTML=ordD.map(d=>`<span class="b ${DIFF_CLS[d]}">${d}: ${tec[d]}</span>`).join('');
+  if(legEl) legEl.innerHTML=ordD.map(d=>`<span class="b ${AGG_CLS[d]}">${d}: ${tec[d]}</span>`).join('');
 
   const capPerAnno=ANNI.map(a=>{
     const s=new Set();
